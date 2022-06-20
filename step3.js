@@ -76,7 +76,7 @@ function performUnitOfWork(fiber) {
   }
 
   // 返回下一个fiber
-  console.log(fiber, 'fiber')
+  console.log(fiber, "fiber");
   // 拼错了，这就是ts的好处
   if (fiber.child) return fiber.child;
 
@@ -165,3 +165,6 @@ React.render(
 );
 
 window.requestIdleCallback(workloop);
+
+// 问题
+// 对对，我这里想到了，这样的渲染方式是间断的，用户可能会看到一点一点的页面，体验不好
