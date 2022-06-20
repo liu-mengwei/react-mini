@@ -144,6 +144,14 @@ function createElement(type, props, ...children) {
         ...props,
         children: [vdom],
       },
+      update: () => {
+        const vdom = type(props);
+
+        // 重新更新
+        // 问题，我怎么触发这个update调用呢，function里面缺失信息能够调用到这里
+        this.props.children = [vdom];
+        // 更新nextUnitOfWork
+      },
     };
   }
 
