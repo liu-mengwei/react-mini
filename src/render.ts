@@ -1,4 +1,11 @@
-import { createDom, reconcileChildren } from "./utils";
+import { commitRoot } from "./commit";
+import { reconcileChildren } from "./reconciler";
+import { createDom } from "./utils";
+
+// nextUnitOfeWork 其实就是特殊的fiber，意思就是下一个fiber,理解成指针
+let nextUnitOfWork = null;
+let wipRoot: any = null; // 整个wip树的根节点
+let currentRoot = null;
 
 window.requestIdleCallback(workloop);
 
@@ -14,39 +21,14 @@ function workloop(deadline) {
     shouldYield = deadline.timeRemaining() < 1;
   }
 
-  // 如果没有下个任务了，
+  // 如果没有下个任务了
+  // 完整构建出了新的fiber树，代码难理解的地方其实就是频繁改全局变量
   if (!nextUnitOfWork && wipRoot) {
-    commitRoot();
+    commitRoot(wipRoot);
   }
 
   window.requestIdleCallback(workloop);
 }
-
-function commitRoot() {
-  // 再这里提交整个树，更新dom,
-  // 但是问题来了，现在我的dom都是分立的dom，dom还没有被整合起来
-  commitWork(wipRoot.child);
-  currentRoot = wipRoot;
-  wipRoot = null;
-}
-
-// 递归提交变动所有节点 ?其实这里不是也用了递归吗，那我用fiber有太大的意义吗
-function commitWork(fiber) {
-  if (!fiber) return;
-
-  commitWork(fiber.child);
-  commitWork(fiber.sibling);
-
-  // 等一下我这样写有意义吗，应该是无意义的，你可能不需要先从底部节点构建，现代浏览器这种都是批量更新的
-  if (fiber?.parent?.dom) {
-    fiber.parent.dom.appendChild(fiber.dom);
-  }
-}
-
-// nextUnitOfeWork 其实就是特殊的fiber，意思就是下一个fiber,理解成指针
-let nextUnitOfWork = null;
-let wipRoot = null; // 整个wip树的根节点
-let currentRoot = null;
 
 function performUnitOfWork(fiber) {
   // 创建dom
@@ -73,7 +55,7 @@ function performUnitOfWork(fiber) {
 }
 
 export function render(element, container) {
-  // 构建root根节点
+  // 构建root根节点 这个是一个新的 fiber树起点
   wipRoot = {
     dom: container,
     props: {
@@ -83,4 +65,12 @@ export function render(element, container) {
   };
 
   nextUnitOfWork = wipRoot;
+}
+
+export function clearWipRoot() {
+  wipRoot = null;
+}
+
+export function setCurrentRoot(fiber) {
+  currentRoot = fiber;
 }

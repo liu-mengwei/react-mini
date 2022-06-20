@@ -1,30 +1,9 @@
-export function createBase(element) {
+export function createBaseFiber(element) {
   return {
     props: element.props,
     type: element.type,
     dom: null,
   };
-}
-
-// wip是半成品的意思，意思是经过了这个函数，子元素全部生成了新的fiber,并且引用正确
-export function reconcileChildren(wipFiber, elements) {
-  // 构建新的fibers
-  let lastFiber;
-  for (let i = 0; i < elements.length; i++) {
-    const element = elements[i];
-    let newFiber = {
-      dom: null,
-      parent: wipFiber,
-      ...createBase(element),
-    };
-
-    if (i === 0) {
-      wipFiber.child = newFiber;
-    } else {
-      lastFiber.sibling = newFiber;
-    }
-    lastFiber = newFiber;
-  }
 }
 
 export function createElement(type, props, ...children) {
