@@ -35,6 +35,7 @@ function performUnitOfWork(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber);
   }
+  console.log("fiber.props.children", fiber.props.children);
 
   reconcileChildren(fiber, fiber.props.children);
 
@@ -55,6 +56,8 @@ function performUnitOfWork(fiber) {
 }
 
 export function render(element, container) {
+  console.log(element, "element");
+
   // 构建root根节点 这个是一个新的 fiber树起点
   wipRoot = {
     dom: container,
@@ -65,6 +68,7 @@ export function render(element, container) {
   };
 
   nextUnitOfWork = wipRoot;
+  console.log(currentRoot, "currentRoot");
 }
 
 export function clearWipRoot() {

@@ -2,7 +2,6 @@
   "name": "react-mini",
   "version": "1.0.0",
   "description": "",
-  "main": "step5.js",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -12,7 +11,8 @@
   "dependencies": {
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "react-scripts": "3.0.1"
+    "react-scripts": "3.0.1",
+    "typescript": "^4.7.4"
   },
   "author": "",
   "license": "ISC",
