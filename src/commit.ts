@@ -18,27 +18,42 @@ export function commitRoot(wipRoot) {
   clearDeleteFibers();
 }
 
+// 找到最近的dom节点, 需要适配组件节点
+function getParentDom(fiber) {
+  if (!fiber || !fiber.parent) return null;
+
+  if (fiber.parent.dom) return fiber.parent.dom;
+  return getParentDom(fiber.parent);
+}
+
+function getDeleteDom(fiber) {
+  if (!fiber) return null;
+
+  if (fiber.dom) return fiber.dom;
+  return getDeleteDom(fiber.child);
+}
+
 // 递归提交变动所有节点 ?其实这里不是也用了递归吗，那我用fiber有太大的意义吗
 function commitWork(fiber) {
   if (!fiber) return;
 
   // 等一下我把commitWork有意义吗，应该是无意义的，你可能不需要先从底部节点构建，现代浏览器这种都是批量更新的
   // 处理添加
+  const parentDom = getParentDom(fiber);
+
   if (fiber.effectTag === "ADD") {
-    if (fiber.parent?.dom && fiber.dom) fiber.parent.dom.appendChild(fiber.dom);
-    fiber.effectTag = "";
+    if (fiber.dom) parentDom?.appendChild(fiber.dom);
   }
 
   // 处理更新
   if (fiber.effectTag === "UPDATE") {
     updateDom(fiber.dom, fiber.alternate.props, fiber.props);
-    fiber.effectTag = "";
   }
 
   // 处理删除
   if (fiber.effectTag === "DELETE") {
-    if (fiber.dom) fiber.parent?.dom?.removeChild(fiber.dom);
-    fiber.effectTag = "";
+    const deleteDom = getDeleteDom(fiber);
+    if (deleteDom) parentDom?.removeChild(deleteDom);
     // 删除完成直接返回
     return;
   }
@@ -52,6 +67,8 @@ function commitWork(fiber) {
 // 添加或者更新新增的dom属性
 // 事件处理
 function updateDom(dom, prevProps, currentProps) {
+  if (!dom) return;
+
   function isEvent(key) {
     return key.startsWith("on");
   }

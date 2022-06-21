@@ -1,35 +1,27 @@
-import { render } from "./render";
-import { createElement } from "./utils";
 import "./index.css";
+import MiReact from "./MiReact";
 
-const Didact = {
-  createElement,
-  render,
-};
-
-let visible = true;
-
-function main() {
-  const container = document.querySelector("#root");
-
-  /** @jsx Didact.createElement */
-  function updateValue(e) {
-    rerender(e.target.value, visible);
-  }
-
-  function rerender(value) {
-    Didact.render(
-      <input
-        onInput={updateValue}
-        className={value === "" && "input"}
-        value={value}
-        style={{ fontSize: "18px" }} // 无法更新
-      />,
-      container
-    );
-  }
-
-  rerender("hello world", visible);
+/** @jsx MiReact.createElement */
+function Text({ text }) {
+  return <span>{text}</span>;
 }
 
-main();
+function App() {
+  const [visible, setVisible] = MiReact.useState(false);
+
+  return (
+    <div>
+      <button
+        onClick={() => {
+          setVisible(!visible);
+        }}
+      >
+        toggle
+      </button>
+      {visible && <Text text={"么么哒"} />}
+    </div>
+  );
+}
+
+const container = document.querySelector("#root");
+MiReact.render(<App />, container);

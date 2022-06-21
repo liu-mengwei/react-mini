@@ -57,7 +57,6 @@ export function createDom(fiber) {
           dom[key][prop] = fiber.props[key][prop];
         }
       } else {
-        debugger
         dom[key] = fiber.props[key];
       }
     });

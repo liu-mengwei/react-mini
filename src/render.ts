@@ -1,4 +1,5 @@
 import { commitRoot } from "./commit";
+import { resetHookIndex, setWipFiber } from "./hooks";
 import { reconcileChildren } from "./reconciler";
 import { createDom } from "./utils";
 
@@ -30,14 +31,33 @@ function workloop(deadline) {
   window.requestIdleCallback(workloop);
 }
 
-function performUnitOfWork(fiber) {
+function updateFunctionComponentNode(fiber) {
+  // 将当前fiber指向一个全局变量
+  // 后续useState会用到，因为这里没有函数参数传递，只能执行全局变量
+  setWipFiber(fiber);
+  fiber.hooks = [];
+  resetHookIndex();
+
+  // 运行得到 children
+  const children = fiber.type(fiber.props);
+  reconcileChildren(fiber, [children]); //在react中 dom只有一个节点
+}
+
+function updateDomNode(fiber) {
   // 创建dom
   if (!fiber.dom) {
     fiber.dom = createDom(fiber);
   }
-  console.log("fiber.props.children", fiber.props.children);
 
   reconcileChildren(fiber, fiber.props.children);
+}
+
+function performUnitOfWork(fiber) {
+  if (typeof fiber.type === "function") {
+    updateFunctionComponentNode(fiber); // 判断如果是函数节点
+  } else {
+    updateDomNode(fiber); // 如果是普遍dom节点
+  }
 
   // 拼错了，这就是ts的好处
   if (fiber.child) return fiber.child;
@@ -56,8 +76,6 @@ function performUnitOfWork(fiber) {
 }
 
 export function render(element, container) {
-  console.log(element, "element");
-
   // 构建root根节点 这个是一个新的 fiber树起点
   wipRoot = {
     dom: container,
@@ -68,7 +86,6 @@ export function render(element, container) {
   };
 
   nextUnitOfWork = wipRoot;
-  console.log(currentRoot, "currentRoot");
 }
 
 export function clearWipRoot() {
@@ -77,4 +94,14 @@ export function clearWipRoot() {
 
 export function setCurrentRoot(fiber) {
   currentRoot = fiber;
+}
+
+export function setWipRoot() {
+  wipRoot = {
+    dom: currentRoot.dom,
+    props: currentRoot.props,
+    alternate: currentRoot, //需要保留上次构建的fiber树的引用
+  };
+
+  nextUnitOfWork = wipRoot;
 }
