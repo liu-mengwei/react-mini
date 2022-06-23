@@ -9,6 +9,16 @@ function Text({ text }) {
 function App() {
   const [visible, setVisible] = MiReact.useState(false);
 
+  MiReact.useEffect(() => {
+    if (visible) {
+      console.log("么么哒");
+    }
+
+    return () => {
+      console.log("卸载么么哒");
+    };
+  });
+
   return (
     <div>
       <button

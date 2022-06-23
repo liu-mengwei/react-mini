@@ -1,3 +1,4 @@
+import { performEffects } from "./hooks";
 import { clearDeleteFibers, deleteFibers } from "./reconciler";
 import { clearWipRoot, setCurrentRoot } from "./render";
 import { isProperty } from "./utils";
@@ -9,6 +10,9 @@ export function commitRoot(wipRoot) {
   deleteFibers.forEach(commitWork);
   // 处理啊添加更新
   commitWork(wipRoot.child);
+
+  // 渲染完成，运行effect hooks钩子
+  performEffects();
 
   // 保留旧的fiber引用
   setCurrentRoot(wipRoot);
