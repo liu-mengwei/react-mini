@@ -25,7 +25,7 @@ function workloop(deadline) {
   // 如果没有下个任务了
   // 完整构建出了新的fiber树，代码难理解的地方其实就是频繁改全局变量
   if (!nextUnitOfWork && wipRoot) {
-    commitRoot(wipRoot);
+    commitRoot();
   }
 
   window.requestIdleCallback(workloop);
@@ -94,6 +94,14 @@ export function clearWipRoot() {
 
 export function setCurrentRoot(fiber) {
   currentRoot = fiber;
+}
+
+export function getCurrentRoot() {
+  return currentRoot;
+}
+
+export function getWipRoot() {
+  return wipRoot;
 }
 
 export function setWipRoot() {

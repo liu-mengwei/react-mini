@@ -3,11 +3,22 @@ import MiReact from "./MiReact";
 
 /** @jsx MiReact.createElement */
 function Text({ text }) {
-  return <span>{text}</span>;
+  const [subTitle, setSubTitle] = MiReact.useState("subTitle");
+
+  MiReact.useEffect(() => {
+    setSubTitle(text);
+  }, [text]);
+
+  return (
+    <div>
+      {text}
+      {subTitle}
+    </div>
+  );
 }
 
 function App() {
-  const [visible, setVisible] = MiReact.useState(false);
+  const [visible, setVisible] = MiReact.useState(true);
 
   MiReact.useEffect(() => {
     if (visible) {
@@ -20,16 +31,18 @@ function App() {
   });
 
   return (
-    <div>
-      <button
-        onClick={() => {
-          setVisible(!visible);
-        }}
-      >
-        toggle
-      </button>
-      {visible && <Text text={"么么哒"} />}
-    </div>
+    // <div>
+    //   <button
+    //     onClick={() => {
+    //       setVisible(!visible);
+    //     }}
+    //   >
+    //     toggle
+    //   </button>
+    //   {visible && <Text text={"么么"} />}
+    //   <Text text="hello" />
+    // </div>
+    <Text text="hello" />
   );
 }
 

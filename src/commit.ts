@@ -1,23 +1,34 @@
 import { performEffects } from "./hooks";
 import { clearDeleteFibers, deleteFibers } from "./reconciler";
-import { clearWipRoot, setCurrentRoot } from "./render";
+import {
+  clearWipRoot,
+  setCurrentRoot,
+  getCurrentRoot,
+  getWipRoot,
+} from "./render";
 import { isProperty } from "./utils";
 
-export function commitRoot(wipRoot) {
+export function commitRoot() {
   // 再这里提交整个树，更新dom
   // 但是问题来了，现在我的dom都是分立的dom，dom还没有被整合起来
   // 处理删除
   deleteFibers.forEach(commitWork);
+
+  const wipRoot = getWipRoot();
   // 处理啊添加更新
   commitWork(wipRoot.child);
 
-  // 渲染完成，运行effect hooks钩子
-  performEffects();
-
   // 保留旧的fiber引用
   setCurrentRoot(wipRoot);
-  // 任务完成，这个fiber树清空
-  clearWipRoot();
+
+  // 渲染完成，运行effect hooks钩子  bug**** //这是时候可能会更改全局变量wipRoot,这时候不能清空wipRoot
+  performEffects();
+
+  if (getWipRoot() === getCurrentRoot()) {
+    // 任务完成，这个fiber树清空
+    clearWipRoot();
+  }
+
   // 清理
   clearDeleteFibers();
 }
@@ -58,6 +69,9 @@ function commitWork(fiber) {
   if (fiber.effectTag === "DELETE") {
     const deleteDom = getDeleteDom(fiber);
     if (deleteDom) parentDom?.removeChild(deleteDom);
+    // 处理节点的卸载hook
+    if (fiber?.unEffect) fiber?.unEffect();
+
     // 删除完成直接返回
     return;
   }

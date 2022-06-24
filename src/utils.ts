@@ -6,6 +6,7 @@ export function createBaseFiber(element) {
   };
 }
 
+// 我说为什么children 要放在props里面，是为了实现 funtion({props})
 export function createElement(type, props, ...children) {
   return {
     type,
