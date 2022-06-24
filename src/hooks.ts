@@ -69,21 +69,26 @@ export function useState(initialValue) {
 //   effect: () => {},
 //   deps: [],
 // };
-let effects = [];
+let effectHooks = [];
 
 export function useEffect(effect, deps) {
-  let newEffect = {
+  let newEffectHook = {
     effect,
     deps,
     fiber: wipFiber,
   };
 
-  wipFiber.effect = newEffect; // 将副作用也挂到组件节点上
-  effects.push(newEffect);
+  // 将副作用也挂到组件节点上
+  if (!wipFiber.effectHooks) {
+    wipFiber.effectHooks = [];
+  }
+  wipFiber.effectHooks.push(newEffectHook);
+
+  effectHooks.push(newEffectHook);
 }
 
-export function clearEffects() {
-  effects = [];
+export function clearEffectHooks() {
+  effectHooks = [];
 }
 
 function shouldRefresh(oldDeps, deps) {
@@ -107,25 +112,34 @@ function shouldRefresh(oldDeps, deps) {
 }
 
 export function performEffects() {
-  effects?.forEach((effectHook) => {
+  let hookIndex = 0;
+  let currentFiber;
+
+  effectHooks?.forEach((effectHook) => {
     const { effect, deps, fiber } = effectHook;
+    // 重置
+    if (fiber !== currentFiber) {
+      hookIndex = 0;
+      currentFiber = fiber;
+    }
 
     // 找到之前的组件节点的状态
-    const oldFiber = fiber?.alternate;
+    let oldEffect = fiber?.alternate?.effectHooks?.[hookIndex];
 
     // 浅比较
     let unEffect;
-    if (shouldRefresh(oldFiber?.effect?.deps, deps)) {
+    if (shouldRefresh(oldEffect?.deps, deps)) {
       // 清理前一次的unEffect
-      if (oldFiber?.unEffect) oldFiber?.unEffect();
+      if (oldEffect?.unEffect) oldEffect?.unEffect();
 
       unEffect = effect();
     }
 
-    if (unEffect) {
-      fiber.unEffect = unEffect;
-    }
+    // 继承旧的unEffect
+    fiber.effectHooks[hookIndex].unEffect = unEffect || oldEffect?.unEffect;
+
+    hookIndex++;
   });
 
-  clearEffects();
+  clearEffectHooks();
 }

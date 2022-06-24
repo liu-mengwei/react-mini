@@ -1,48 +1,50 @@
-import "./index.css";
 import MiReact from "./MiReact";
 
 /** @jsx MiReact.createElement */
-function Text({ text }) {
+function Text({ text, visible = false }) {
   const [subTitle, setSubTitle] = MiReact.useState("subTitle");
+  const [subTitle2, setSubTitle2] = MiReact.useState("subTitle2");
 
   MiReact.useEffect(() => {
-    setSubTitle(text);
+    setSubTitle("subTitle展示" + Math.random());
+
+    return () => {
+      console.log("卸载");
+    };
   }, [text]);
+
+  MiReact.useEffect(() => {
+    if (visible) {
+      setSubTitle2("subTitle2展示" + Math.random());
+    }
+  }, [visible]);
 
   return (
     <div>
-      {text}
-      {subTitle}
+      subTitle :{subTitle}
+      <br />
+      subTitle2 :{subTitle2}
     </div>
   );
 }
 
 function App() {
-  const [visible, setVisible] = MiReact.useState(true);
-
-  MiReact.useEffect(() => {
-    if (visible) {
-      console.log("么么哒");
-    }
-
-    return () => {
-      console.log("卸载么么哒");
-    };
-  });
+  const [visible, setVisible] = MiReact.useState(false);
+  const [text, setText] = MiReact.useState("hello");
 
   return (
-    // <div>
-    //   <button
-    //     onClick={() => {
-    //       setVisible(!visible);
-    //     }}
-    //   >
-    //     toggle
-    //   </button>
-    //   {visible && <Text text={"么么"} />}
-    //   <Text text="hello" />
-    // </div>
-    <Text text="hello" />
+    <div>
+      <button
+        onClick={() => {
+          setVisible(!visible);
+          setText("toggle" + Math.random());
+        }}
+      >
+        toggle
+      </button>
+      <Text text="么么" />
+      <Text text={text} visible={visible} />
+    </div>
   );
 }
 
