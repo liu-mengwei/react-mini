@@ -1,5 +1,5 @@
 import { commitRoot } from "./commit";
-import { resetHookIndex, setWipFiber } from "./hooks";
+import { resetHookIndex, resetRefHookIndex, setWipFiber } from "./hooks";
 import { reconcileChildren } from "./reconciler";
 import { createDom } from "./utils";
 
@@ -37,6 +37,7 @@ function updateFunctionComponentNode(fiber) {
   setWipFiber(fiber);
   fiber.hooks = [];
   resetHookIndex();
+  resetRefHookIndex()
 
   // 运行得到 children
   const children = fiber.type(fiber.props);

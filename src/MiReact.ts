@@ -1,5 +1,5 @@
 import { render } from "./render";
 import { createElement } from "./utils";
-import { useState, useEffect } from "./hooks";
+import { useState, useEffect, useRef } from "./hooks";
 
-export default { render, createElement, useState, useEffect };
+export default { render, createElement, useState, useEffect, useRef };

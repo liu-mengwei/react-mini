@@ -2,11 +2,15 @@ import MiReact from "./MiReact";
 
 /** @jsx MiReact.createElement */
 function Text({ text, visible = false }) {
-  const [subTitle, setSubTitle] = MiReact.useState("subTitle");
+  // const [subTitle, setSubTitle] = MiReact.useState("subTitle");
   const [subTitle2, setSubTitle2] = MiReact.useState("subTitle2");
+  const indexRef = MiReact.useRef(2);
+  const countRef = MiReact.useRef("count");
+  countRef.current = "setCount";
 
   MiReact.useEffect(() => {
-    setSubTitle("subTitle展示" + Math.random());
+    console.log(indexRef.current, "current");
+    console.log(countRef.current, 'current')
 
     return () => {
       console.log("卸载");
@@ -20,8 +24,8 @@ function Text({ text, visible = false }) {
   }, [visible]);
 
   return (
-    <div>
-      subTitle :{subTitle}
+    <div ref={indexRef}>
+      {/* subTitle :{subTitle} */}
       <br />
       subTitle2 :{subTitle2}
     </div>
@@ -42,8 +46,8 @@ function App() {
       >
         toggle
       </button>
-      <Text text="么么" />
-      <Text text={text} visible={visible} />
+      {/* <Text text="么么" key="ss" /> */}
+      <Text text={text} key="eee" visible={visible} />
     </div>
   );
 }

@@ -143,3 +143,24 @@ export function performEffects() {
 
   clearEffectHooks();
 }
+
+let refHookIndex = 0;
+
+export function resetRefHookIndex() {
+  refHookIndex = 0;
+}
+
+export function useRef(initialValue) {
+  const oldHook = wipFiber?.alternate?.refHooks?.[refHookIndex];
+
+  let newHook = oldHook || {
+    current: initialValue,
+  };
+
+  if (!wipFiber.refHooks) wipFiber.refHooks = [];
+  wipFiber.refHooks.push(newHook);
+  
+  refHookIndex++;
+
+  return newHook;
+}

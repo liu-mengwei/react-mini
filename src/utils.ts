@@ -52,16 +52,24 @@ export function createDom(fiber) {
     .filter(isProperty)
     .filter((key) => !isEvent(key))
     .forEach((key) => {
-      // 如果属性是一个对象就会比较麻烦
+      // 处理ref
+      if (key === "ref") {
+        handleRef(fiber, dom);
+        return;
+      }
+
+      // 如果属性是一个对象就会比较麻烦 style类似
       if (typeof dom[key] === "object") {
         for (let prop in fiber.props[key]) {
           dom[key][prop] = fiber.props[key][prop];
         }
       } else {
+        // 普通属性
         dom[key] = fiber.props[key];
       }
     });
 
+  // 事件属性
   Object.keys(fiber.props)
     .filter(isProperty)
     .filter(isEvent)
@@ -69,4 +77,19 @@ export function createDom(fiber) {
       dom.addEventListener(key.toLowerCase().slice(2), fiber.props[key]);
     });
   return dom;
+}
+
+function handleRef(fiber, dom) {
+  // 向上找到最近的父组件节点
+  while (fiber.parent) {
+    if (typeof fiber.parent.type === "function") {
+      // 找到那个对象
+      let refHook = fiber.parent.refHooks?.find(
+        (item) => item === fiber.props["ref"]
+      );
+      if (refHook) refHook.current = dom;
+      break;
+    }
+    fiber.parent = fiber.parent.parent;
+  }
 }
